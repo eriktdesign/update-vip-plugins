@@ -77,7 +77,7 @@ success_count=0
 fail_count=0
 
 # Loop through the plugins and download the latest version of each one that has an update available
-json_response=$(vip @$current_directory.$branch --yes -- wp plugin list --format=json --skip-plugins --skip-themes)
+json_response=$(vip @$current_directory.$branch --yes -- wp plugin list --format=json --skip-plugins --skip-themes --status=active,active-network,inactive)
 for row in $(echo "${json_response}" | jq -r '.[] | @base64'); do
     _jq() {
      echo ${row} | base64 --decode | jq -r ${1}
