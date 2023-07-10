@@ -11,7 +11,7 @@ display_usage() {
     echo "  --env      : Specify the environment name from which to retrieve plugins. Defaults to the current git branch."
     echo "  --help     : Display this help message."
     echo ""
-    echo "Downloads plugin updates for a WordPress VIP site. Only plugins publicly available on the WordPress.org plugin directory will be updated."
+    echo "Downloads plugin updates for a WordPress VIP site. Only plugins publicly available on the WordPress.org plugin directory will be updated. Run from the root directory of a locally cloned VIP repository."
 }
 
 # Parse command line arguments
@@ -39,6 +39,25 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+# Function to display error message and installation links
+display_error_message() {
+    echo "Error: The required command '$1' is not available on your system."
+    echo "Please install '$1' to use this script."
+    echo "Installation links:"
+    echo "$2"
+    exit 1
+}
+
+# Check if 'vip' command is available
+if ! command -v vip &> /dev/null; then
+    display_error_message "vip" "https://docs.wpvip.com/technical-references/vip-cli/"
+fi
+
+# Check if 'jq' command is available
+if ! command -v jq &> /dev/null; then
+    display_error_message "jq" "https://stedolan.github.io/jq/"
+fi
 
 # Get the name of the current Git branch
 if [[ "$environment_override" = false ]]; then
