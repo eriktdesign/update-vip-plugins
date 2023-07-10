@@ -1,15 +1,54 @@
 #!/bin/bash
 
-# Updates plugins in a VIP repository from the WordPress.org plugins directory
-# Run this from the root of your VIP repository directory
-# Will use the current git branch name and the directory name to fetch updates available from the matching VIP environment
-# Depends on the VIP CLI, jq, and curl.
+# Initialize variables
+app_override=false
+environment_override=false
+
+# Function to display usage instructions
+display_usage() {
+    echo "Usage: $0 [--app <directory>] [--env <environment_name>] [--help]"
+    echo "  --app      : Specify the VIP app name or ID from which the plugin version list should be retrieved. Defaults to the current directory name."
+    echo "  --env      : Specify the environment name from which to retrieve plugins. Defaults to the current git branch."
+    echo "  --help     : Display this help message."
+    echo ""
+    echo "Downloads plugin updates for a WordPress VIP site. Only plugins publicly available on the WordPress.org plugin directory will be updated."
+}
+
+# Parse command line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --app)
+            current_directory="$2"
+            app_override=true
+            shift
+            ;;
+        --env)
+            branch="$2"
+            environment_override=true
+            shift
+            ;;
+        --help)
+            display_usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown parameter passed: $1"
+            display_usage
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Get the name of the current Git branch
-branch=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$environment_override" = false ]]; then
+    branch=$(git rev-parse --abbrev-ref HEAD)
+fi
 
 # Get the name of the current directory without the full path
-current_directory=$(basename $(pwd))
+if [[ "$app_override" = false ]]; then
+    current_directory=$(basename "$(pwd)")
+fi
 
 # Create a temporary directory to download the zip files
 temp_dir=$(mktemp -d)
